@@ -1,4 +1,5 @@
-﻿using Kolokwium_1.Repositories;
+﻿using Kolokwium_1.DTOs;
+using Kolokwium_1.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Kolokwium_1.Controllers;
@@ -13,7 +14,7 @@ public class AnimalController : ControllerBase
         _repository = animalsRepository;
     }
 
-    [HttpGet("animals/{id}")]
+    [HttpGet("{id}")]
     public async Task<IActionResult> GetAnimalByID(int id)
     {
         if (!await _repository.DoesAnimalExist(id))
@@ -22,5 +23,17 @@ public class AnimalController : ControllerBase
         var animal = await _repository.GetAnimal(id);
 
         return Ok(animal);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> PostAnimal(NewAnimalDTO newAnimal)
+    {
+        if (!await _repository.DoesOwnerExist(newAnimal.OwnerId))
+            return NotFound($"Animal with given ID - {newAnimal.OwnerId} doesn't exist");
+        // if (!await _repository.DoesAnimalClassExist(newAnimal.Class))
+        //     return NotFound($"Animal with given ID - {id} doesn't exist");
+
+
+        return Ok();
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Data.SqlClient;
+﻿using Kolokwium_1.DTOs;
+using Microsoft.Data.SqlClient;
 
 namespace Kolokwium_1.Repositories;
 
@@ -24,9 +25,63 @@ public class AnimalRepository : IAnimalRepository
 
         await connection.OpenAsync();
 
-        var res = await command.ExecuteScalarAsync();
+        var does = await command.ExecuteScalarAsync();
 
-        return res is not null;
+        return does is not null;
+    }
+    
+    public async Task<bool> DoesOwnerExist(int id)
+    {
+	    var query = "SELECT 1 FROM Owner WHERE ID = @ID";
+
+	    await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+	    await using SqlCommand command = new SqlCommand();
+
+	    command.Connection = connection;
+	    command.CommandText = query;
+	    command.Parameters.AddWithValue("@ID", id);
+
+	    await connection.OpenAsync();
+
+	    var does = await command.ExecuteScalarAsync();
+
+	    return does is not null;
+    }
+    
+    public async Task<bool> DoesProceduresExist(int id)
+    {
+	    var query = "SELECT 1 FROM [Procedure] WHERE ID = @ID";
+
+	    await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+	    await using SqlCommand command = new SqlCommand();
+
+	    command.Connection = connection;
+	    command.CommandText = query;
+	    command.Parameters.AddWithValue("@ID", id);
+
+	    await connection.OpenAsync();
+
+	    var does = await command.ExecuteScalarAsync();
+
+	    return does is not null;
+    }
+    
+    public async Task<bool> DoesAnimalClassExist(int id)
+    {
+	    var query = "SELECT 1 FROM Animal_Class WHERE ID = @ID";
+
+	    await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+	    await using SqlCommand command = new SqlCommand();
+
+	    command.Connection = connection;
+	    command.CommandText = query;
+	    command.Parameters.AddWithValue("@ID", id);
+
+	    await connection.OpenAsync();
+
+	    var does = await command.ExecuteScalarAsync();
+
+	    return does is not null;
     }
     
     
@@ -82,6 +137,23 @@ public class AnimalRepository : IAnimalRepository
 	    }
 	    if (animalDto is null) throw new Exception();
 	    return animalDto;
+    }
+
+    public async Task PostAnimal(NewAnimalDTO newAnimal)
+    {
+	    var query = "INSERT INTO Animal VALUES(@Name, @AnimalClassID, @AdmissionDate, @OwnerId); SELECT @@IDENTITY AS ID;";
+	    
+	    await using SqlConnection connection = new SqlConnection(_configuration.GetConnectionString("Default"));
+	    await using SqlCommand command = new SqlCommand();
+
+	    command.Connection = connection;
+	    command.CommandText = query;
+
+	    command.Parameters.AddWithValue("@Name", newAnimal.Name);
+	    // command.Parameters.AddWithValue("@AnimalClassID", newAnimal.Class);
+	    command.Parameters.AddWithValue("@AdmissionDate", newAnimal.AdmissionDate);
+	    command.Parameters.AddWithValue("@OwnerId", newAnimal.OwnerId);
+
     }
 
 }
